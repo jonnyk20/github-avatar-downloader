@@ -1,10 +1,21 @@
 var request = require('request');
 var fs = require('fs');
+var dotenv = require('dotenv');
+dotenv.config({path: './credentials.env'});
+
+const GITHUB_USER = process.env.DB_USER;
+const GITHUB_TOKEN = process.env.DB_PASS;
 
 function getRepoContributors(repoOwner, repoName, cb) {
+var requestURL = 'https://'+ GITHUB_USER + ':' + GITHUB_TOKEN + '@api.github.com/repos/' + repoOwner + '/' + repoName + '/contributors';
+  if (!repoOwner || !repoName) {
+    console.log("Please enter repo name and owner");
+    return;
+  }
+
   var contributors = [];
   request.get(requestURL, options,function(error, response, body){
-    Promise.resolve(
+    Promise.resolve( // <- Is this necessary?
     contributors = JSON.parse(body)).then(function(){
       contributors.forEach(function(person) {
         // console.log("Login:",person.login);
@@ -27,16 +38,12 @@ function downloadImageByURL(url, filePath) {
   .on('error', function (err) {    
     console.log(err);                             
     throw err; 
-  })     ;            
+  });            
 }
 
 
 
-var repoOwner = "jquery";
-var repoName = "jquery";
-var GITHUB_USER = "jonnyk20";
-var GITHUB_TOKEN = "9bb52bcea1faeb39411c7e009a819febaadc9371";
-var requestURL = 'https://'+ GITHUB_USER + ':' + GITHUB_TOKEN + '@api.github.com/repos/' + repoOwner + '/' + repoName + '/contributors';
+
 
 var options = {
   headers: {
@@ -44,7 +51,7 @@ var options = {
   }
 };
 
-getRepoContributors("jquery", "jquery", function(err, result) {
+getRepoContributors(process.argv[2], process.argv[3], function(err, result) {
   console.log("Errors:", err);
   console.log("Result:", result);
 });
