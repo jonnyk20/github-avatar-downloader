@@ -7,19 +7,30 @@ function getRepoContributors(repoOwner, repoName, cb) {
     Promise.resolve(
     contributors = JSON.parse(body)).then(function(){
       contributors.forEach(function(person) {
-        console.log(person.avatar_url);
+        // console.log("Login:",person.login);
+        // console.log("Avatar:",person.avatar_url);
+        downloadImageByURL(person.avatar_url, "./avatars/" + person.login + ".jpg" );
       });
     })
   })               
   .on('error', function (err) {    
     console.log(err);                             
     throw err; 
-  })
-  // .on('end', function (res) {                          
-  //   console.log('Finished');
-  // })
-  //.pipe(fs.createWriteStream('./downloaded.html'));         
+  })      
 }
+
+
+function downloadImageByURL(url, filePath) {
+  request.get(url, options,function(error, response, body){
+  })
+  .pipe(fs.createWriteStream(filePath))
+  .on('error', function (err) {    
+    console.log(err);                             
+    throw err; 
+  })     ;            
+}
+
+
 
 var repoOwner = "jquery";
 var repoName = "jquery";
@@ -37,3 +48,5 @@ getRepoContributors("jquery", "jquery", function(err, result) {
   console.log("Errors:", err);
   console.log("Result:", result);
 });
+
+// downloadImageByURL("https://avatars2.githubusercontent.com/u/2741?v=3&s=466", "avatars/kvirani.jpg")
