@@ -1,10 +1,9 @@
-/*eslint-disable*/
 var request = require('request');
 var fs = require('fs');
 var dotenv = require('dotenv');
 dotenv.config({path: './.env'});
 
-// define Necessary variables
+// define necessary variables
 const username = process.env.GITHUB_USERNAME;
 const token = process.env.GITHUB_TOKEN;
 var options = {
@@ -29,6 +28,8 @@ function listContributors(error, response, body){
       return;
   }
   var contributors = JSON.parse(body);
+
+  // create array of which resolves when a contributor's stars have been counted
   const allPromises = contributors.map(function(person, contributorIndex) {
     var myPromise = new Promise(function(resolve, reject){
       var url = 'https://' + username + ':' + token + '@api.github.com/users/' + person.login + "/starred"
@@ -38,12 +39,12 @@ function listContributors(error, response, body){
     })
     return myPromise;
   });
+ // When all star counting promises have returned, return..
+ // encompassing promise, and count stars to find the most popular repo
   Promise.all(allPromises).then(function(){
-
     var sorted = Object.keys(repoCount).sort(function(a, b){
       return  repoCount[b].count - repoCount[a].count;
     }).slice(0, 6);
-
     sorted.forEach(function(repo){
       console.log(`[${repoCount[repo].count} stars] ${repoCount[repo].name} / ${repoCount[repo].owner}`);
     });
@@ -51,12 +52,11 @@ function listContributors(error, response, body){
   })
 }
 
-// download images
+// count starts that a particular contributor has given
 function listStarred(url, name, cb){
   request.get(url, options, function(err, res, body){
     var starred = JSON.parse(body);
     starred.forEach(function(starredRepo){
-      //repoCount[starredRepo.id] = !repoCount[starredRepo.id] ? 1 : repoCount[starredRepo.id] + 1;
       if (!repoCount[starredRepo.id]){
         repoCount[starredRepo.id] = {
           count: 1,
@@ -71,7 +71,7 @@ function listStarred(url, name, cb){
   })
 }
 
-// get repo lsit of repo conntributors and use callback
+// get repo lsit of repo contributors and use callback
 function getRepoContributors(repoOwner, repoName, cb) {
   var requestURL = 'https://'+ username + ':' + token + '@api.github.com/repos/' + repoOwner + '/' + repoName + '/contributors';
   console
