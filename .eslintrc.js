@@ -9,6 +9,7 @@ module.exports = {
         "sourceType": "module"
     },
     "rules": {
+        "no-console":0,
         "accessor-pairs": "error",
         "array-bracket-newline": "error",
         "array-bracket-spacing": "error",
@@ -69,7 +70,7 @@ module.exports = {
         "id-blacklist": "error",
         "id-length": "error",
         "id-match": "error",
-        "indent": "off",
+        "indent": "on",
         "indent-legacy": "off",
         "init-declarations": "error",
         "jsx-quotes": "error",
