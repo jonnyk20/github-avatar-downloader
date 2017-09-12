@@ -18,7 +18,7 @@ var path =  "./avatars/";
 var repoCount = {};
 
 // list username and avatar usrls of contributors
-function listAvatarUrls(error, response, body){
+function listContributors(error, response, body){
  // Check for asynchronous errors
   switch(true) {
     case (response.statusCode == 404):
@@ -33,14 +33,21 @@ function listAvatarUrls(error, response, body){
     var myPromise = new Promise(function(resolve, reject){
       var url = 'https://' + username + ':' + token + '@api.github.com/users/' + person.login + "/starred"
       listStarred(url, person.login, function(){
-        console.log("stars counted");
         resolve();
       });
     })
     return myPromise;
   });
   Promise.all(allPromises).then(function(){
-    console.log(repoCount);
+
+    var sorted = Object.keys(repoCount).sort(function(a, b){
+      return  repoCount[b].count - repoCount[a].count;
+    }).slice(0, 6);
+
+    sorted.forEach(function(repo){
+      console.log(`[${repoCount[repo].count} stars] ${repoCount[repo].name} / ${repoCount[repo].owner}`);
+    });
+
   })
 }
 
@@ -49,7 +56,16 @@ function listStarred(url, name, cb){
   request.get(url, options, function(err, res, body){
     var starred = JSON.parse(body);
     starred.forEach(function(starredRepo){
-      repoCount[starredRepo.id] = !repoCount[starredRepo.id] ? 1 : repoCount[starredRepo.id] + 1;
+      //repoCount[starredRepo.id] = !repoCount[starredRepo.id] ? 1 : repoCount[starredRepo.id] + 1;
+      if (!repoCount[starredRepo.id]){
+        repoCount[starredRepo.id] = {
+          count: 1,
+          name: starredRepo.name,
+          owner: starredRepo.owner.login
+        };
+      } else {
+        repoCount[starredRepo.id].count++;
+      }
     });
     cb();
   })
@@ -80,16 +96,5 @@ function getRepoContributors(repoOwner, repoName, cb) {
     })      
 }
 
-getRepoContributors(process.argv[2], process.argv[3], listAvatarUrls);
+getRepoContributors(process.argv[2], process.argv[3], listContributors);
 
-var path2 = "./.env";
-function checkPath(path2){
-  if (fs.existsSync(path2)) {
-  console.log("exists");
-    } else {
-      console.log("Does not exists");
-  }
-}
-// setTimeout(function() {
-//   console.log(repoCount);
-// }, 10000);
